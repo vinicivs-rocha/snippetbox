@@ -1,14 +1,19 @@
-###
-GET http://localhost:8080/
+@baseUrl = http://localhost:8080
 
-###
-GET http://localhost:8080/fail
+### Hello
+GET {{baseUrl}}/
 
-###
-GET http://localhost:8080/snippet/view
+### Not Found
+GET {{baseUrl}}/fail
 
-###
-GET http://localhost:8080/snippet/create
+### View without query param
+GET {{baseUrl}}/snippet/view
 
-###
-POST http://localhost:8080/snippet/create
+### View with query param
+GET {{baseUrl}}/snippet/view?id=2
+
+### Create with GET
+GET {{baseUrl}}/snippet/create
+
+### Create with POST
+POST {{baseUrl}}/snippet/create
