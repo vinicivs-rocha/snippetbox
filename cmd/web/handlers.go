@@ -13,7 +13,17 @@ func (a *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 		a.clientError(w, http.StatusMethodNotAllowed)
 		return
 	}
-	w.Write([]byte("Create some snippet..."))
+
+	title := "O snail"
+	content := "O snail\nClimb Mount Fuji,\nBut slowly, slowly!\n\n- Kobayashi Issa"
+	expires := 7
+
+	id, err := a.snippetsRepo.Insert(title, content, expires)
+	if err != nil {
+		a.serverError(w, err)
+		return
+	}
+	http.Redirect(w, r, fmt.Sprintf("/snippet/view?id=%d", id), http.StatusSeeOther)
 }
 
 func (a *application) home(w http.ResponseWriter, r *http.Request) {

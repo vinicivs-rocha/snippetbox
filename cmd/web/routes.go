@@ -10,4 +10,6 @@ func (a *application) routes() *http.ServeMux {
 	mux.HandleFunc("/", a.home)
 	mux.HandleFunc("/snippet/view", a.viewSnippet)
 	mux.HandleFunc("/snippet/create", a.createSnippet)
+
+	return mux
 }
