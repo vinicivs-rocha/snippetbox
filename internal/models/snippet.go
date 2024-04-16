@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"errors"
 	"time"
 )
 
@@ -37,9 +38,64 @@ func (s *SnippetRepository) Insert(title string, content string, expires int) (i
 }
 
 func (s *SnippetRepository) Get(id int) (*SnippetModel, error) {
-	return nil, nil
+	stmt := `
+		SELECT * 
+		FROM snippets
+		WHERE expires > UTC_TIMESTAMP()
+		AND id = ?
+	`
+
+	row := s.DB.QueryRow(stmt, id)
+
+	snp := &SnippetModel{}
+
+	err := row.Scan(&snp.ID, &snp.Title, &snp.Content, &snp.Created, &snp.Expires)
+
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		return nil, ErrNoRecord
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return snp, nil
 }
 
 func (s *SnippetRepository) Latest() ([]*SnippetModel, error) {
-	return nil, nil
+	stmt := `
+		SELECT *
+		FROM snippets
+		WHERE expires > UTC_TIMESTAMP()
+		ORDER BY id DESC
+		LIMIT 10
+	`
+
+	rows, err := s.DB.Query(stmt)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	snps := []*SnippetModel{}
+
+	for rows.Next() {
+		snp := &SnippetModel{}
+
+		err := rows.Scan(&snp.ID, &snp.Title, &snp.Content, &snp.Created, &snp.Expires)
+
+		if err != nil {
+			return nil, err
+		}
+
+		snps = append(snps, snp)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return snps, nil
 }

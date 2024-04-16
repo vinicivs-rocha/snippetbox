@@ -1,9 +1,11 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-	"html/template"
+	// "html/template"
 	"net/http"
+	"snippetbox.vinicivs-rocha.com/internal/models"
 	"strconv"
 )
 
@@ -32,25 +34,14 @@ func (a *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	files := []string{
-		"./ui/html/pages/base.tmpl.html",
-		"./ui/html/pages/nav.tmpl.html",
-		"./ui/html/pages/home.tmpl.html",
-	}
-	ts, err := template.ParseFiles(files...)
-
+	snps, err := a.snippetsRepo.Latest()
 	if err != nil {
-		a.errLogger.Println(err.Error())
 		a.serverError(w, err)
 		return
 	}
 
-	err = ts.ExecuteTemplate(w, "base", nil)
-
-	if err != nil {
-		a.errLogger.Println(err.Error())
-		a.serverError(w, err)
-		return
+	for _, snp := range snps {
+		fmt.Fprintf(w, "%+v\n", snp)
 	}
 }
 
@@ -60,5 +51,18 @@ func (a *application) viewSnippet(w http.ResponseWriter, r *http.Request) {
 		a.clientError(w, http.StatusBadRequest)
 		return
 	}
-	fmt.Fprintf(w, "Displaying snippet with id %d", id)
+
+	snp, err := a.snippetsRepo.Get(id)
+
+	if err != nil && errors.Is(err, models.ErrNoRecord) {
+		a.notFound(w)
+		return
+	}
+
+	if err != nil {
+		a.serverError(w, err)
+		return
+	}
+
+	fmt.Fprintf(w, "%+v", snp)
 }

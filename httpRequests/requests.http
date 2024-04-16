@@ -10,7 +10,7 @@ GET {{baseUrl}}/fail
 GET {{baseUrl}}/snippet/view
 
 ### View with query param
-GET {{baseUrl}}/snippet/view?id=2
+GET {{baseUrl}}/snippet/view?id=29
 
 ### Create with GET
 GET {{baseUrl}}/snippet/create
